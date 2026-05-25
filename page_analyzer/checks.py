@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 def truncate_with_ellipsis(text, max_len=255):
     if text is None:
         return ''
-    if len(text) > max_len:
+    if len(text) >= max_len:
         return text[:max_len - 3] + '...'
     return text
 
