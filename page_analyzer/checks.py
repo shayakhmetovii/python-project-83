@@ -8,7 +8,7 @@ def get_check(html_doc):
     if soup.find('meta', {'name': 'description'}):
         description = soup.find('meta', {'name': 'description'})['content']
         if len(description) > 255:
-            description = f'{description[:254]}'
+            description = description[:254]
     else:
         description = ''
     return h1, title, description

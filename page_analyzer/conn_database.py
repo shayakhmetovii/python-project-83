@@ -8,20 +8,7 @@ def make_conn():
     return psycopg2.connect(DATABASE_URL)
 
 
-# def get_url_list():
-#     conn = make_conn()
-#     with conn.cursor(cursor_factory=DictCursor) as curs:
-#         curs.execute('SELECT\
-#                       url_checks.url_id,\
-#                       MAX(url_checks.created_at) AS check_crested_at,\
-#                       url_checks.status_code,\
-#                      (SELECT name FROM urls WHERE id = url_checks.url_id)\
-#                       FROM url_checks\
-#                       GROUP BY url_checks.url_id, url_checks.status_code \
-#                       ORDER BY url_checks.url_id DESC')
-#         url_list = curs.fetchall()
-#     conn.close()
-#     return url_list
+
 
 
 def get_url_list():
@@ -61,7 +48,6 @@ def get_by_id(id):
     with conn.cursor(cursor_factory=DictCursor) as curs:
         curs.execute('SELECT * FROM urls where id = (%s)', (id,))
         url = curs.fetchone()
-    conn.commit()
     conn.close()
     return url
 
@@ -71,7 +57,6 @@ def get_by_name(name):
     with conn.cursor(cursor_factory=DictCursor) as curs:
         curs.execute('SELECT * FROM urls where name = (%s)', (name,))
         url = curs.fetchone()
-    conn.commit()
     conn.close()
     return url
 

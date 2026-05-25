@@ -44,16 +44,13 @@ def add_new_url():
     errors = validate(normalized_url)
     same_url = get_by_name(normalized_url)
     if errors:
-        if 'no_url' in errors.keys():
-            flash(errors['no_url'], 'alert-danger')
-            errors = get_flashed_messages(with_categories=True)
-        elif 'incorrect_url' in errors.keys():
-            flash(errors['incorrect_url'], 'alert-danger')
-            errors = get_flashed_messages(with_categories=True)
+        for key, message in errors.items():
+            flash(message, 'alert-danger')
+        flashed_errors = get_flashed_messages(with_categories=True)
         return render_template(
             'main.html',
             new_url=new_url,
-            errors=errors
+            errors=flashed_errors
         ), 422
     elif same_url:
         added_url = get_by_name(normalized_url)
@@ -73,23 +70,25 @@ def add_new_url():
 def get_all_urls():
     all_urls = get_url_list()
     last_checks = get_last_checks_list()
-    result_list = list()
-    result = {}
+    # Create mapping url_id -> check
+    check_by_url_id = {check['url_id']: check for check in last_checks}
+    result_list = []
     for url in all_urls:
-        for check in last_checks:
-            if url['id'] == check['url_id']:
-                result = {'id': url['id'],
-                          'name': url['name'],
-                          'created_at': check['check_created_at'],
-                          'status_code': check['status_code']
-                          }
-                break
-            else:
-                result = {'id': url['id'],
-                          'name': url['name'],
-                          'created_at': '',
-                          'status_code': ''
-                          }
+        check = check_by_url_id.get(url['id'])
+        if check:
+            result = {
+                'id': url['id'],
+                'name': url['name'],
+                'created_at': check['check_created_at'],
+                'status_code': check['status_code']
+            }
+        else:
+            result = {
+                'id': url['id'],
+                'name': url['name'],
+                'created_at': '',
+                'status_code': ''
+            }
         result_list.append(result)
     return render_template('urls.html', urls=result_list)
 
@@ -113,9 +112,8 @@ def add_new_check(id):
         flash('Произошла ошибка при проверке', 'alert-danger')
         return redirect(url_for('get_url', id=id))
     else:
-        r = requests.get(page_name)
-        html_doc = r.text
-        status_code = r.status_code
+        html_doc = response.text
+        status_code = response.status_code
         h1, title, description = get_check(html_doc)
         add_to_check_list(id, status_code=status_code, h1=h1,
                           title=title, description=description)
