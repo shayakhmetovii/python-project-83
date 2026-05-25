@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 
 
-def truncate_with_ellipsis(text, max_len=255):
+def truncate_with_ellipsis(text, max_len=200):
     if text is None:
         return ''
     if len(text) >= max_len:
